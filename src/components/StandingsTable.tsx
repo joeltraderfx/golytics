@@ -1,23 +1,21 @@
-import { teams } from "@/lib/teamsData";
-import { Trophy, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Trophy } from "lucide-react";
+import type { TeamStats } from "@/lib/teamsData";
 
-// Pontos fictícios para demo
-const standings = teams
-  .map((t, i) => ({
-    ...t,
-    position: i + 1,
-    points: 60 - i * 3 + Math.floor(Math.random() * 5),
-    played: 18,
-    won: 18 - i > 12 ? 12 : 18 - i > 8 ? 9 : 18 - i > 4 ? 6 : 3,
-    drawn: 4,
-    lost: 0,
-    goalsFor: 30 + Math.floor(Math.random() * 15),
-    goalsAgainst: 15 + Math.floor(Math.random() * 20),
-  }))
-  .sort((a, b) => b.points - a.points)
-  .map((t, i) => ({ ...t, position: i + 1 }));
+interface StandingsTableProps {
+  teams: TeamStats[];
+}
 
-export function StandingsTable() {
+export function StandingsTable({ teams }: StandingsTableProps) {
+  const standings = [...teams].sort((a, b) => a.position - b.position || b.points - a.points);
+
+  if (standings.length === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+        Classificação ainda não carregada.
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       <div className="flex items-center gap-2 p-4 border-b border-border">
@@ -43,7 +41,7 @@ export function StandingsTable() {
           <tbody>
             {standings.map((team) => {
               const goalDiff = team.goalsFor - team.goalsAgainst;
-              const isLibertadores = team.position <= 6;
+              const isLibertadores = team.position > 0 && team.position <= 6;
               const isSulAmericana = team.position > 6 && team.position <= 12;
               const isRebaixamento = team.position > 16;
 
@@ -59,7 +57,7 @@ export function StandingsTable() {
                           isLibertadores ? "bg-primary" : isSulAmericana ? "bg-blue-500" : isRebaixamento ? "bg-destructive" : "bg-transparent"
                         }`}
                       />
-                      <span className="font-display font-semibold tabular-nums">{team.position}</span>
+                      <span className="font-display font-semibold tabular-nums">{team.position || "-"}</span>
                     </div>
                   </td>
                   <td className="p-2">
@@ -73,10 +71,10 @@ export function StandingsTable() {
                       <span className="font-medium truncate">{team.name}</span>
                     </div>
                   </td>
-                  <td className="text-center p-2 tabular-nums">{team.played}</td>
-                  <td className="text-center p-2 tabular-nums hidden sm:table-cell">{team.won}</td>
-                  <td className="text-center p-2 tabular-nums hidden sm:table-cell">{team.drawn}</td>
-                  <td className="text-center p-2 tabular-nums hidden sm:table-cell">{team.lost}</td>
+                  <td className="text-center p-2 tabular-nums">{team.games}</td>
+                  <td className="text-center p-2 tabular-nums hidden sm:table-cell">{team.wins}</td>
+                  <td className="text-center p-2 tabular-nums hidden sm:table-cell">{team.draws}</td>
+                  <td className="text-center p-2 tabular-nums hidden sm:table-cell">{team.losses}</td>
                   <td className="text-center p-2 tabular-nums hidden md:table-cell">{team.goalsFor}</td>
                   <td className="text-center p-2 tabular-nums hidden md:table-cell">{team.goalsAgainst}</td>
                   <td className="text-center p-2 tabular-nums">

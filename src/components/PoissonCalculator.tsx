@@ -1,28 +1,44 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { predictMatch, probToOdds } from "@/lib/poisson";
 import { ProbabilityBar } from "./ProbabilityBar";
 import { Calculator, Target, Zap, TrendingUp } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { teams, getTeamById } from "@/lib/teamsData";
+import { getTeamById } from "@/lib/teamsData";
+import type { TeamStats } from "@/lib/teamsData";
 import { TeamBadge } from "./TeamBadge";
 
-export function PoissonCalculator() {
-  const [homeId, setHomeId] = useState(teams[0].id);
-  const [awayId, setAwayId] = useState(teams[1].id);
+interface PoissonCalculatorProps {
+  teams: TeamStats[];
+  initialHomeId?: string;
+  initialAwayId?: string;
+}
 
-  const home = getTeamById(homeId)!;
-  const away = getTeamById(awayId)!;
+export function PoissonCalculator({ teams, initialHomeId, initialAwayId }: PoissonCalculatorProps) {
+  const [homeId, setHomeId] = useState(initialHomeId || teams[0]?.id || "");
+  const [awayId, setAwayId] = useState(initialAwayId || teams[1]?.id || "");
 
-  const prediction = useMemo(
-    () =>
-      predictMatch(
-        home.attackStrength,
-        home.defenseWeakness,
-        away.attackStrength,
-        away.defenseWeakness
-      ),
-    [homeId, awayId]
-  );
+  useEffect(() => {
+    if (initialHomeId) setHomeId(initialHomeId);
+    if (initialAwayId) setAwayId(initialAwayId);
+  }, [initialHomeId, initialAwayId]);
+
+  const home = getTeamById(teams, homeId);
+  const away = getTeamById(teams, awayId);
+
+  const prediction = useMemo(() => {
+    if (!home || !away) return null;
+    return predictMatch(home.attackStrength, home.defenseWeakness, away.attackStrength, away.defenseWeakness);
+  }, [home, away]);
+
+  if (teams.length === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-5 text-center text-sm text-muted-foreground">
+        Times ainda não carregados.
+      </div>
+    );
+  }
+
+  if (!home || !away || !prediction) return null;
 
   return (
     <div className="rounded-xl border border-border bg-card p-5">

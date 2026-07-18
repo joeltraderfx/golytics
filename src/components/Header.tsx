@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
-const LOGO_URL = "/manus-storage/golytics-logo_0205af0b.png";
-
 interface HeaderProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -39,7 +37,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           <div className="flex items-center gap-3">
             <div className="relative">
               <img
-                src={LOGO_URL}
+                src={`${import.meta.env.BASE_URL}logo.png`}
                 alt="Golytics"
                 className="w-11 h-11 rounded-xl object-cover ring-1 ring-primary/20"
               />

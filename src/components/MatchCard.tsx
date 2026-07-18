@@ -1,30 +1,28 @@
 import { TeamBadge } from "./TeamBadge";
 import { ProbabilityBar } from "./ProbabilityBar";
 import { predictMatch, probToOdds } from "@/lib/poisson";
-import { getTeamById, type Match } from "@/lib/teamsData";
+import type { Match, TeamStats } from "@/lib/teamsData";
 import { ChevronRight, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MatchCardProps {
   match: Match;
+  home: TeamStats;
+  away: TeamStats;
   onClick?: () => void;
   className?: string;
 }
 
 function formatDate(dateStr: string) {
   const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
   const days = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
   const day = days[d.getDay()];
   const time = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   return `${day} ${time}`;
 }
 
-export function MatchCard({ match, onClick, className }: MatchCardProps) {
-  const home = getTeamById(match.homeId);
-  const away = getTeamById(match.awayId);
-
-  if (!home || !away) return null;
-
+export function MatchCard({ match, home, away, onClick, className }: MatchCardProps) {
   const prediction = predictMatch(
     home.attackStrength,
     home.defenseWeakness,

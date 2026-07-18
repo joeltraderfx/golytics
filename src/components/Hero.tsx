@@ -1,5 +1,3 @@
-const HERO_URL = "/manus-storage/golytics-hero_5f3ebf55.png";
-
 interface HeroProps {
   round: number;
   matchCount: number;
@@ -8,20 +6,12 @@ interface HeroProps {
 export function Hero({ round, matchCount }: HeroProps) {
   return (
     <section className="relative overflow-hidden rounded-xl border border-border mb-6">
-      {/* Background */}
-      <div className="absolute inset-0">
-        <img
-          src={HERO_URL}
-          alt=""
-          className="w-full h-full object-cover opacity-50"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/20" />
-      </div>
+      {/* Background: gradiente (sem foto — mantém o visual sem depender de asset externo) */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-background" />
 
       {/* Grid overlay */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.05]"
         style={{
           backgroundImage: `linear-gradient(${"var(--color-primary)"} 1px, transparent 1px), linear-gradient(90deg, ${"var(--color-primary)"} 1px, transparent 1px)`,
           backgroundSize: "40px 40px",
@@ -33,7 +23,7 @@ export function Hero({ round, matchCount }: HeroProps) {
         <div className="flex items-center gap-2 mb-4">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/15 border border-primary/30 text-primary text-xs font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            RODADA {round}
+            {round > 0 ? `RODADA ${round}` : "BRASILEIRÃO 2026"}
           </span>
           <span className="text-xs text-muted-foreground">{matchCount} jogos analisados</span>
         </div>

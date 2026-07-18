@@ -2,11 +2,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { TeamBadge } from "./TeamBadge";
 import { ProbabilityBar } from "./ProbabilityBar";
 import { predictMatch, probToOdds } from "@/lib/poisson";
-import { getTeamById, type Match } from "@/lib/teamsData";
+import type { Match, TeamStats } from "@/lib/teamsData";
 import { TrendingUp, Target, Shield, Zap, BarChart3 } from "lucide-react";
 
 interface MatchAnalysisModalProps {
   match: Match | null;
+  home: TeamStats | null;
+  away: TeamStats | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -25,13 +27,8 @@ function FormBadge({ result }: { result: "W" | "D" | "L" }) {
   );
 }
 
-export function MatchAnalysisModal({ match, open, onOpenChange }: MatchAnalysisModalProps) {
-  if (!match) return null;
-
-  const home = getTeamById(match.homeId);
-  const away = getTeamById(match.awayId);
-
-  if (!home || !away) return null;
+export function MatchAnalysisModal({ match, home, away, open, onOpenChange }: MatchAnalysisModalProps) {
+  if (!match || !home || !away) return null;
 
   const prediction = predictMatch(
     home.attackStrength,
@@ -46,7 +43,7 @@ export function MatchAnalysisModal({ match, open, onOpenChange }: MatchAnalysisM
         <DialogHeader>
           <DialogTitle className="text-lg font-display">Análise Preditiva</DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            {match.stadium} · Rodada {match.round}
+            {match.stadium ? `${match.stadium} · ` : ""}Rodada {match.round}
           </DialogDescription>
         </DialogHeader>
 
@@ -56,7 +53,9 @@ export function MatchAnalysisModal({ match, open, onOpenChange }: MatchAnalysisM
             <TeamBadge name={home.name} shortName={home.shortName} color={home.color} size="lg" />
             <span className="text-sm font-display font-semibold text-center">{home.name}</span>
             <div className="flex gap-1">
-              {home.form.map((f, i) => <FormBadge key={i} result={f} />)}
+              {home.form.length > 0
+                ? home.form.slice(0, 5).map((f, i) => <FormBadge key={i} result={f} />)
+                : <span className="text-[10px] text-muted-foreground">sem dados</span>}
             </div>
           </div>
 
@@ -74,7 +73,9 @@ export function MatchAnalysisModal({ match, open, onOpenChange }: MatchAnalysisM
             <TeamBadge name={away.name} shortName={away.shortName} color={away.color} size="lg" />
             <span className="text-sm font-display font-semibold text-center">{away.name}</span>
             <div className="flex gap-1">
-              {away.form.map((f, i) => <FormBadge key={i} result={f} />)}
+              {away.form.length > 0
+                ? away.form.slice(0, 5).map((f, i) => <FormBadge key={i} result={f} />)
+                : <span className="text-[10px] text-muted-foreground">sem dados</span>}
             </div>
           </div>
         </div>
@@ -218,7 +219,7 @@ export function MatchAnalysisModal({ match, open, onOpenChange }: MatchAnalysisM
         </div>
 
         <p className="text-[11px] text-muted-foreground text-center pt-2">
-          Análise calculada com Golytics Pro. Dados ilustrativos para fins informativos.
+          Estimativa estatística (modelo de Poisson) baseada em gols reais marcados/sofridos na temporada. Não é garantia de resultado.
         </p>
       </DialogContent>
     </Dialog>
