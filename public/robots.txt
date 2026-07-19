@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://joeltraderfx.github.io/golytics/sitemap.xml

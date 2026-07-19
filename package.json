@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "cp index.html index.html.original && node scripts/prerender.mjs",
     "build": "vite build",
+    "postbuild": "mv index.html.original index.html",
     "preview": "vite preview"
   },
   "dependencies": {
