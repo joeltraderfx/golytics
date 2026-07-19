@@ -22,6 +22,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      post_generated: ${{ steps.gen.outputs.generated }}
+      post_date: ${{ steps.gen.outputs.date }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,6 +32,27 @@ jobs:
           node-version: 20
           cache: "npm"
       - run: npm install
+      - name: Gera a imagem e legenda do post diário
+        id: gen
+        working-directory: scripts/social
+        run: |
+          npm install --no-audit --no-fund
+          mkdir -p ../../public/posts
+          POST_OUT_DIR=../../public/posts node generate-daily-post.mjs
+          DATE=$(date -u +%Y-%m-%d)
+          if [ -f "../../public/posts/golytics-$DATE.png" ]; then
+            echo "generated=true" >> "$GITHUB_OUTPUT"
+            echo "date=$DATE" >> "$GITHUB_OUTPUT"
+          else
+            echo "generated=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Guarda a legenda para o job de publicação no Instagram
+        if: steps.gen.outputs.generated == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-caption
+          path: public/posts/golytics-${{ steps.gen.outputs.date }}.txt
+          retention-days: 3
       - run: npm run build
         env:
           GITHUB_PAGES: "true"
@@ -45,3 +69,27 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  post-instagram:
+    needs: [build, deploy]
+    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && needs.build.outputs.post_generated == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+        working-directory: scripts/social
+      - uses: actions/download-artifact@v4
+        with:
+          name: post-caption
+          path: caption
+      - name: Publica no Instagram
+        working-directory: scripts/social
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_BUSINESS_ACCOUNT_ID: ${{ secrets.IG_BUSINESS_ACCOUNT_ID }}
+          IMAGE_PUBLIC_URL: https://joeltraderfx.github.io/golytics/posts/golytics-${{ needs.build.outputs.post_date }}.png
+          CAPTION_FILE: ../../caption/golytics-${{ needs.build.outputs.post_date }}.txt
+        run: node post-to-instagram.mjs

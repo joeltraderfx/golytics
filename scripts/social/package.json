@@ -1,0 +1,10 @@
+{
+  "name": "golytics-social",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Geração e publicação automática de posts diários do Golytics",
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.2"
+  }
+}

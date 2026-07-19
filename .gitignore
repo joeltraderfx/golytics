@@ -3,3 +3,5 @@ dist/
 .env
 *.log
 index.html.original
+scripts/social/node_modules/
+public/posts/
