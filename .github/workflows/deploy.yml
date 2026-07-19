@@ -3,6 +3,11 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  schedule:
+    # Todo dia às 09:00 (horário de Brasília, UTC-3) = 12:00 UTC.
+    # Rebuilda o site com dados atualizados de classificação e próximos jogos,
+    # mesmo sem nenhum commit novo — mantém o conteúdo de SEO sempre fresco.
+    - cron: "0 12 * * *"
   workflow_dispatch:
 
 permissions:
